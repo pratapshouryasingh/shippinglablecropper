@@ -1,6 +1,6 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Footer from "./components/footer";
 import PdfViewer from "./pages/PdfViewer";
 import FlipkartCropper from './pages/FlipkartCropper';
 import ECommerceCropper from "./pages/E-CommerceCropper";
