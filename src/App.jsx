@@ -1,6 +1,6 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Footer from "./components/footer";
 import PdfViewer from "./pages/PdfViewer";
 import FlipkartCropper from './pages/FlipkartCropper';
 import ECommerceCropper from "./pages/E-CommerceCropper";
@@ -25,66 +25,43 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col">
        <Helmet>
-  {/* Page Title */}
-  <title>PDF & E-commerce Toolkit | ShippingLabelCrop</title>
+        {/* Primary Meta Tags */}
+        <title>AI-Powered Cropper Tool | Free Image Crop & Resize for E-commerce</title>
+        <meta 
+          name="description" 
+          content="Use our free AI-powered cropper tool to crop, resize, and optimize product images for Flipkart, Meesho, Amazon, and any e-commerce platform. Fast, simple, and SEO-friendly." 
+        />
+        <meta 
+          name="keywords" 
+          content="AI cropper, free crop tool, image cropper online, product image resizer, e-commerce crop tool, Flipkart image crop, Meesho image crop, Amazon image crop, SEO friendly cropper" 
+        />
+        <meta name="author" content="Your Brand Name" />
 
-  {/* Meta Description */}
-  <meta
-    name="description"
-    content="Convert, view, and edit PDFs, images, and documents online. Crop product images for Flipkart, Meesho, and JioMart effortlessly with ShippingLabelCrop."
-  />
+        {/* Open Graph (Facebook, LinkedIn, etc.) */}
+        <meta property="og:title" content="AI-Powered Cropper Tool | Free Image Crop & Resize" />
+        <meta 
+          property="og:description" 
+          content="Crop, resize, and optimize product images for Flipkart, Meesho, Amazon, and more with our free AI cropper tool. Boost your e-commerce sales with perfect images." 
+        />
+        <meta property="og:url" content="https://yourdomain.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/preview.png" />
 
-  {/* Meta Keywords */}
-  <meta
-    name="keywords"
-    content="PDF Converter, PDF Viewer, PDF Editor, Image to PDF, PDF to Word, JPG to PNG, E-commerce Cropper, Flipkart Cropper, Meesho Cropper, JioMart Cropper, Product Image Editor"
-  />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AI-Powered Cropper Tool | Free Image Crop & Resize" />
+        <meta 
+          name="twitter:description" 
+          content="Optimize your e-commerce product images with our AI-powered cropper tool. Works with Flipkart, Meesho, Amazon & more." 
+        />
+        <meta name="twitter:image" content="https://yourdomain.com/preview.png" />
 
-  {/* Open Graph / Social Sharing */}
-  <meta property="og:title" content="PDF & E-commerce Toolkit | ShippingLabelCrop" />
-  <meta
-    property="og:description"
-    content="Powerful online tools to convert, edit, and view PDFs, and crop product images for major e-commerce platforms like Flipkart, Meesho, and JioMart."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://shippinglabelcrop.in/" />
-  <meta property="og:image" content="https://shippinglabelcrop.in/og-image.png" />
+        {/* Mobile/SEO Optimizations */}
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="canonical" href="https://yourdomain.com/" />
+      </Helmet>
 
-  {/* Twitter Card */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="PDF & E-commerce Toolkit | ShippingLabelCrop" />
-  <meta
-    name="twitter:description"
-    content="Convert PDFs, edit documents, and crop product images for Flipkart, Meesho, and JioMart easily with ShippingLabelCrop."
-  />
-  <meta name="twitter:image" content="https://shippinglabelcrop.in/og-image.png" />
-
-  {/* JSON-LD Structured Data */}
-  <script type="application/ld+json">
-    {`
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "ShippingLabelCrop.in",
-        "url": "https://shippinglabelcrop.in/",
-        "description": "Your PDF & E-commerce Toolkit: PDF viewer, editor, and e-commerce image cropping tools for Flipkart, Meesho, JioMart, and more.",
-        "publisher": {
-          "@type": "Organization",
-          "name": "ShippingLabelCrop.in",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://shippinglabelcrop.in/logo.png"
-          }
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://shippinglabelcrop.in/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      }
-    `}
-  </script>
-</Helmet>
 
       {/* Hero Section */}
       <div className="flex-grow max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">

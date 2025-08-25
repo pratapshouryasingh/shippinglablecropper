@@ -98,6 +98,30 @@ const MeshooCropper = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <Helmet>
+  <title>Meesho Label Cropper | Free PDF Invoice & Label Tool</title>
+  <meta 
+    name="description" 
+    content="Easily crop and process Meesho PDF shipping labels and invoices with our free online cropper. Save time and optimize your e-commerce workflow." 
+  />
+  <meta 
+    name="keywords" 
+    content="Meesho label cropper, Meesho invoice tool, crop Meesho PDF, Meesho seller tools, e-commerce PDF crop, Meesho shipping label resize" 
+  />
+  <link rel="canonical" href="https://yourdomain.com/MeshooCropper" />
+
+  <meta property="og:title" content="Meesho Label Cropper | Free PDF Tool" />
+  <meta property="og:description" content="Free Meesho PDF label & invoice cropper. Process seller invoices quickly." />
+  <meta property="og:url" content="https://yourdomain.com/MeshooCropper" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yourdomain.com/preview-meesho.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Meesho Label Cropper | Free PDF Invoice Tool" />
+  <meta name="twitter:description" content="Crop & process Meesho PDF invoices and labels instantly." />
+  <meta name="twitter:image" content="https://yourdomain.com/preview-meesho.png" />
+</Helmet>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

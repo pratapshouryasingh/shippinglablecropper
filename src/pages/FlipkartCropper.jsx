@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet";
 import { useUser, useClerk } from "@clerk/clerk-react";
 
 const FlipkartCropper = () => {
@@ -115,6 +116,31 @@ const FlipkartCropper = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 ">
+         <Helmet>
+        <title>Flipkart Label Cropper | Free PDF Invoice & Label Processing Tool</title>
+        <meta 
+          name="description" 
+          content="Crop, resize, and process Flipkart shipping labels and invoices easily. Our free Flipkart cropper tool helps sellers save time and streamline e-commerce operations." 
+        />
+        <meta 
+          name="keywords" 
+          content="Flipkart label cropper, Flipkart invoice tool, crop Flipkart PDF, Flipkart seller tools, e-commerce PDF crop, Flipkart shipping label resize" 
+        />
+        <link rel="canonical" href="https://yourdomain.com/FlipkartCropper" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:title" content="Flipkart Label Cropper | Free PDF Invoice Tool" />
+        <meta property="og:description" content="Free Flipkart PDF label & invoice cropper. Process your Flipkart seller invoices with ease." />
+        <meta property="og:url" content="https://yourdomain.com/FlipkartCropper" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/preview-flipkart.png" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Flipkart Label Cropper | Free PDF Invoice Tool" />
+        <meta name="twitter:description" content="Crop & process Flipkart PDF invoices and labels instantly." />
+        <meta name="twitter:image" content="https://yourdomain.com/preview-flipkart.png" />
+      </Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

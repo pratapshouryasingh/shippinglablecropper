@@ -205,45 +205,51 @@ export default function UniversalConverter() {
     }
   };
 
-  const downloadAsDOCX = async () => {
-    if (!pages.length) return;
-    setStatus("Converting to DOCX...");
-    
-    try {
-      const doc = new Document({
-        sections: [
-          {
-            children: await Promise.all(pages.map(async (img, index) => {
-              const base64Data = img.split(",")[1];
-              const imageData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-              
-              return new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: imageData,
-                    transformation: {
-                      width: 400,
-                      height: 500,
-                    },
-                  }),
-                  new Paragraph({
-                    text: `Page ${index + 1}`,
-                  }),
-                ],
-              });
-            })),
-          },
-        ],
-      });
-      
-      const blob = await Packer.toBlob(doc);
-      saveAs(blob, `${fileName.replace(/\.[^/.]+$/, "")}-converted.docx`);
-      setStatus("Conversion to DOCX complete!");
-    } catch (error) {
-      console.error("DOCX conversion error:", error);
-      setStatus("Error converting to DOCX");
+const downloadAsDOCX = async () => {
+  if (!pages.length) return;
+  setStatus("Converting to DOCX...");
+
+  try {
+    const children = [];
+
+    for (let i = 0; i < pages.length; i++) {
+      const base64Data = pages[i].split(",")[1];
+      const imageData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+
+      children.push(
+        new Paragraph({
+          children: [
+            new ImageRun({
+              data: imageData,
+              transformation: {
+                width: 500, // scale to fit nicely
+                height: 700,
+              },
+            }),
+          ],
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          text: `Page ${i + 1}`,
+        })
+      );
     }
-  };
+
+    const doc = new Document({
+      sections: [{ children }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${fileName.replace(/\.[^/.]+$/, "")}-converted.docx`);
+    setStatus("Conversion to DOCX complete!");
+  } catch (error) {
+    console.error("DOCX conversion error:", error);
+    setStatus("Error converting to DOCX");
+  }
+};
+
 
   const downloadAsPDF = async () => {
     if (!pages.length) return;
@@ -292,6 +298,7 @@ export default function UniversalConverter() {
   };
 
   return (
+    
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
