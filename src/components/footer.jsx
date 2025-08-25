@@ -130,4 +130,8 @@ const footer = () => {
   );
 };
 
+<<<<<<< HEAD
 export default footer;
+=======
+export default footer;
+>>>>>>> 18c7d7e (Updated SEO tags and docs)

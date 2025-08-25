@@ -97,6 +97,30 @@ const JioMartCropper = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <Helmet>
+  <title>JioMart Label Cropper | Free PDF Invoice & Label Tool</title>
+  <meta 
+    name="description" 
+    content="Free online JioMart cropper to crop, resize, and process PDF shipping labels and invoices for JioMart sellers. Simple and efficient." 
+  />
+  <meta 
+    name="keywords" 
+    content="JioMart label cropper, JioMart invoice tool, crop JioMart PDF, JioMart seller tools, e-commerce PDF crop, JioMart shipping label resize" 
+  />
+  <link rel="canonical" href="https://yourdomain.com/JioMartCropper" />
+
+  <meta property="og:title" content="JioMart Label Cropper | Free PDF Tool" />
+  <meta property="og:description" content="Free JioMart PDF label & invoice cropper. Process seller invoices with ease." />
+  <meta property="og:url" content="https://yourdomain.com/JioMartCropper" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yourdomain.com/preview-jiomart.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JioMart Label Cropper | Free PDF Invoice Tool" />
+  <meta name="twitter:description" content="Crop & process JioMart PDF invoices and labels instantly." />
+  <meta name="twitter:image" content="https://yourdomain.com/preview-jiomart.png" />
+</Helmet>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
