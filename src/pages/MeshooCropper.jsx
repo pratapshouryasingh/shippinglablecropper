@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet";
 import { useUser, useClerk } from "@clerk/clerk-react";
 
 // Initial settings for Meesho
