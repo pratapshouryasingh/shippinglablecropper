@@ -1,12 +1,14 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [ecommerceDropdownOpen, setEcommerceDropdownOpen] = useState(false);
   const location = useLocation();
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +16,20 @@ export default function Navbar() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setEcommerceDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Check if current path is one of the e-commerce croppers
@@ -79,50 +95,71 @@ export default function Navbar() {
             File Converter
           </Link>
           
-          {/* E-commerce Tools Dropdown */}
-          <div className="relative group">
-            <button className={`transition-colors duration-300 px-3 py-2 flex items-center gap-1.5 font-medium ${
-              isEcommercePage 
-                ? "text-blue-600 underline underline-offset-4 decoration-2" 
-                : "text-gray-700 hover:text-blue-600"
-            }`}>
+          {/* E-commerce Tools Dropdown - Now click-based */}
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              className={`transition-colors duration-300 px-3 py-2 flex items-center gap-1.5 font-medium ${
+                isEcommercePage || ecommerceDropdownOpen
+                  ? "text-blue-600 underline underline-offset-4 decoration-2" 
+                  : "text-gray-700 hover:text-blue-600"
+              }`}
+              onClick={() => setEcommerceDropdownOpen(!ecommerceDropdownOpen)}
+            >
               E-commerce Tools
-              <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className={`w-4 h-4 transition-transform ${ecommerceDropdownOpen ? "rotate-180" : ""}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div className="absolute hidden group-hover:block bg-white shadow-xl rounded-lg py-2 w-48 mt-2 border border-gray-100 left-1/2 transform -translate-x-1/2">
-              <Link 
-                to="/FlipkartCropper" 
-                className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
-                  location.pathname === "/FlipkartCropper" 
-                    ? "text-blue-600 bg-blue-50" 
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Flipkart Cropper
-              </Link>
-              <Link 
-                to="/JioMartCropper" 
-                className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
-                  location.pathname === "/JioMartCropper" 
-                    ? "text-blue-600 bg-blue-50" 
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                JioMart Cropper
-              </Link>
-              <Link 
-                to="/MeshooCropper" 
-                className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
-                  location.pathname === "/MeshooCropper" 
-                    ? "text-blue-600 bg-blue-50" 
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Meshoo Cropper
-              </Link>
-            </div>
+            <AnimatePresence>
+              {ecommerceDropdownOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute bg-white shadow-xl rounded-lg py-2 w-48 mt-2 border border-gray-100 left-1/2 transform -translate-x-1/2 z-50"
+                >
+                  <Link 
+                    to="/FlipkartCropper" 
+                    className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
+                      location.pathname === "/FlipkartCropper" 
+                        ? "text-blue-600 bg-blue-50" 
+                        : "text-gray-700 hover:text-blue-600"
+                    }`}
+                    onClick={() => setEcommerceDropdownOpen(false)}
+                  >
+                    Flipkart Cropper
+                  </Link>
+                  <Link 
+                    to="/JioMartCropper" 
+                    className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
+                      location.pathname === "/JioMartCropper" 
+                        ? "text-blue-600 bg-blue-50" 
+                        : "text-gray-700 hover:text-blue-600"
+                    }`}
+                    onClick={() => setEcommerceDropdownOpen(false)}
+                  >
+                    JioMart Cropper
+                  </Link>
+                  <Link 
+                    to="/MeshooCropper" 
+                    className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
+                      location.pathname === "/MeshooCropper" 
+                        ? "text-blue-600 bg-blue-50" 
+                        : "text-gray-700 hover:text-blue-600"
+                    }`}
+                    onClick={() => setEcommerceDropdownOpen(false)}
+                  >
+                    Meshoo Cropper
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Contact Us Link */}
