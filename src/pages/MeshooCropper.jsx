@@ -329,7 +329,7 @@ const MeshooCropper = () => {
                           {file.name}
                         </p>
                         <a
-                          href={`http://localhost:5000${file.url}`}
+                          href={`${import.meta.env.VITE_API_URL}${file.url}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-pink-600 hover:text-pink-800 text-sm font-medium transition-colors"
