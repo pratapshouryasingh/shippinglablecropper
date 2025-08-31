@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUser, useClerk } from "@clerk/clerk-react";
+import { Helmet } from "react-helmet";
 
 // Initial settings for JioMart
 const initialSettings = {
