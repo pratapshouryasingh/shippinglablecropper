@@ -1,29 +1,43 @@
 import axios from "axios";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet";
 import { useUser, useClerk } from "@clerk/clerk-react";
+import Cookies from "js-cookie";
 
 const FlipkartCropper = () => {
-  const [files, setFiles] = useState([]);
-  const [settings, setSettings] = useState({
-    courier_sort: true,
-    sku_sort: true,
-    soldBy_sort: true,
-    add_date_on_top: true,
-    keep_invoice: false,
-    sku_order_count: true,
-  });
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processedFiles, setProcessedFiles] = useState([]);
-  const [error, setError] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(0); // 📊 Track %
-  const [uploadSpeed, setUploadSpeed] = useState(null);    // 📊 Track speed
   const fileInputRef = useRef(null);
   const { user, isLoaded } = useUser();
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
+
+  // Load settings from cookie if exists
+  const savedSettings = Cookies.get("flipkart_settings");
+  const [settings, setSettings] = useState(
+    savedSettings
+      ? JSON.parse(savedSettings)
+      : {
+          courier_sort: true,
+          sku_sort: true,
+          soldBy_sort: true,
+          add_date_on_top: true,
+          keep_invoice: false,
+          sku_order_count: true,
+        }
+  );
+
+  const [files, setFiles] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedFiles, setProcessedFiles] = useState([]);
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0); 
+  const [uploadSpeed, setUploadSpeed] = useState(null);    
+
+  // Persist settings to cookie whenever it changes
+  useEffect(() => {
+    Cookies.set("flipkart_settings", JSON.stringify(settings), { expires: 7 });
+  }, [settings]);
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files).filter(
@@ -48,17 +62,11 @@ const FlipkartCropper = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if user is authenticated
-    if (!isLoaded) return; // Still loading auth state
-    
+    if (!isLoaded) return;
     if (!user) {
-      // Redirect to login if not authenticated
-      openSignIn({
-        redirectUrl: window.location.href,
-      });
+      openSignIn({ redirectUrl: window.location.href });
       return;
     }
-    
     if (files.length === 0) return setError("Select at least one PDF");
 
     setIsProcessing(true);
@@ -86,7 +94,6 @@ const FlipkartCropper = () => {
             );
             setUploadProgress(percent);
 
-            // Calculate speed (KB/s)
             const elapsed = (Date.now() - startTime) / 1000; 
             const speed = (progressEvent.loaded / 1024 / elapsed).toFixed(2);
             setUploadSpeed(speed);
@@ -116,7 +123,7 @@ const FlipkartCropper = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 ">
-         <Helmet>
+      <Helmet>
         <title>Flipkart Label Cropper | Free PDF Invoice & Label Processing Tool</title>
         <meta 
           name="description" 
@@ -126,20 +133,16 @@ const FlipkartCropper = () => {
           name="keywords" 
           content="Flipkart label cropper, Flipkart invoice tool, crop Flipkart PDF, Flipkart seller tools, e-commerce PDF crop, Flipkart shipping label resize" 
         />
-        <link rel="canonical" href="https://yourdomain.com/FlipkartCropper" />
-        
-        {/* Open Graph / Facebook */}
+        <link rel="canonical" href="https://www.shippinglabelcrop.in/FlipkartCropper" />
         <meta property="og:title" content="Flipkart Label Cropper | Free PDF Invoice Tool" />
         <meta property="og:description" content="Free Flipkart PDF label & invoice cropper. Process your Flipkart seller invoices with ease." />
-        <meta property="og:url" content="https://yourdomain.com/FlipkartCropper" />
+        <meta property="og:url" content="https://www.shippinglabelcrop.in/FlipkartCropper" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://yourdomain.com/preview-flipkart.png" />
-
-        {/* Twitter */}
+        <meta property="og:image" content="https://www.shippinglabelcrop.in/preview-flipkart.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Flipkart Label Cropper | Free PDF Invoice Tool" />
         <meta name="twitter:description" content="Crop & process Flipkart PDF invoices and labels instantly." />
-        <meta name="twitter:image" content="https://yourdomain.com/preview-flipkart.png" />
+        <meta name="twitter:image" content="https://www.shippinglabelcrop.in/preview-flipkart.png" />
       </Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -159,7 +162,7 @@ const FlipkartCropper = () => {
                   Flipkart Label Cropper
                 </h1>
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(0)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg
@@ -348,8 +351,7 @@ const FlipkartCropper = () => {
                 >
                   <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
                     <p className="font-semibold">
-                      ✅ {processedFiles.length} file(s) processed
-                      successfully!
+                      ✅ {processedFiles.length} file(s) processed successfully!
                     </p>
                     <p className="text-sm">
                       Your cropped labels are ready for download.
