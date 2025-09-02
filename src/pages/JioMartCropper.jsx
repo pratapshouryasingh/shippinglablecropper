@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import axios from "axios";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useUser, useClerk } from "@clerk/clerk-react";
 import { Helmet } from "react-helmet";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import Cookies from "js-cookie";
 
 // Initial settings for JioMart
 const initialSettings = {
@@ -15,15 +17,28 @@ const initialSettings = {
 };
 
 const JioMartCropper = () => {
-  const [files, setFiles] = useState([]);
-  const [settings, setSettings] = useState(initialSettings);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processedFiles, setProcessedFiles] = useState([]);
-  const [error, setError] = useState("");
   const fileInputRef = useRef(null);
   const { user, isLoaded } = useUser();
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
+
+  // Load settings from cookie if exists
+  const savedSettings = Cookies.get("jiomart_settings");
+  const [settings, setSettings] = useState(
+    savedSettings ? JSON.parse(savedSettings) : initialSettings
+  );
+
+  const [files, setFiles] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedFiles, setProcessedFiles] = useState([]);
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(null);
+
+  // Persist settings to cookie whenever it changes
+  useEffect(() => {
+    Cookies.set("jiomart_settings", JSON.stringify(settings), { expires: 7 });
+  }, [settings]);
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files).filter(
@@ -64,6 +79,8 @@ const JioMartCropper = () => {
     setIsProcessing(true);
     setError("");
     setProcessedFiles([]);
+    setUploadProgress(0);
+    setUploadSpeed(null);
 
     try {
       const formData = new FormData();
@@ -71,56 +88,71 @@ const JioMartCropper = () => {
       formData.append("userId", user.id);
       formData.append("settings", JSON.stringify(settings));
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/jiomart`, {
-        method: "POST",
-        body: formData,
-      });
+      const startTime = Date.now();
 
-      if (!res.ok) throw new Error("Server error");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/jiomart`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percent);
 
-      const data = await res.json();
-      setProcessedFiles(data.outputs || []);
+            const elapsed = (Date.now() - startTime) / 1000; 
+            const speed = (progressEvent.loaded / 1024 / elapsed).toFixed(2);
+            setUploadSpeed(speed);
+          },
+        }
+      );
+
+      setProcessedFiles(res.data.outputs || []);
     } catch (err) {
       console.error(err);
       setError("Failed to process PDFs. Try again.");
     } finally {
       setIsProcessing(false);
+      setUploadProgress(0);
+      setUploadSpeed(null);
     }
   };
 
   const handleReset = () => {
     setFiles([]);
     setProcessedFiles([]);
-    setSettings(initialSettings);
     setError("");
+    setUploadProgress(0);
+    setUploadSpeed(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Helmet>
-  <title>JioMart Label Cropper | Free PDF Invoice & Label Tool</title>
-  <meta 
-    name="description" 
-    content="Free online JioMart cropper to crop, resize, and process PDF shipping labels and invoices for JioMart sellers. Simple and efficient." 
-  />
-  <meta 
-    name="keywords" 
-    content="JioMart label cropper, JioMart invoice tool, crop JioMart PDF, JioMart seller tools, e-commerce PDF crop, JioMart shipping label resize" 
-  />
-  <link rel="canonical" href="https://yourdomain.com/JioMartCropper" />
+        <title>JioMart Label Cropper | Free PDF Invoice & Label Tool</title>
+        <meta 
+          name="description" 
+          content="Free online JioMart cropper to crop, resize, and process PDF shipping labels and invoices for JioMart sellers. Simple and efficient." 
+        />
+        <meta 
+          name="keywords" 
+          content="JioMart label cropper, JioMart invoice tool, crop JioMart PDF, JioMart seller tools, e-commerce PDF crop, JioMart shipping label resize" 
+        />
+        <link rel="canonical" href="https://www.shippinglabelcrop.in/JioMartCropper" />
 
-  <meta property="og:title" content="JioMart Label Cropper | Free PDF Tool" />
-  <meta property="og:description" content="Free JioMart PDF label & invoice cropper. Process seller invoices with ease." />
-  <meta property="og:url" content="https://yourdomain.com/JioMartCropper" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://yourdomain.com/preview-jiomart.png" />
+        <meta property="og:title" content="JioMart Label Cropper | Free PDF Tool" />
+        <meta property="og:description" content="Free JioMart PDF label & invoice cropper. Process seller invoices with ease." />
+        <meta property="og:url" content="https://www.shippinglabelcrop.in/JioMartCropper" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://www.shippinglabelcrop.in/preview-jiomart.png" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="JioMart Label Cropper | Free PDF Invoice Tool" />
-  <meta name="twitter:description" content="Crop & process JioMart PDF invoices and labels instantly." />
-  <meta name="twitter:image" content="https://yourdomain.com/preview-jiomart.png" />
-</Helmet>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="JioMart Label Cropper | Free PDF Invoice Tool" />
+        <meta name="twitter:description" content="Crop & process JioMart PDF invoices and labels instantly." />
+        <meta name="twitter:image" content="https://www.shippinglabelcrop.in/preview-jiomart.png" />
+      </Helmet>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -134,13 +166,13 @@ const JioMartCropper = () => {
             <div className="md:w-2/3 p-8">
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-extrabold text-gray-900 flex items-center">
-                  <span className="bg-blue-400 text-white rounded-xl px-5 py-3 mr-3">
+                  <span className="bg-blue-500 text-white rounded-xl px-5 py-3 mr-3">
                     J
                   </span>
                   JioMart Label Cropper
                 </h1>
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(0)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg
@@ -246,6 +278,26 @@ const JioMartCropper = () => {
                     </motion.div>
                   )}
 
+                  {/* Upload Progress */}
+                  {isProcessing && uploadProgress > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-2"
+                    >
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Uploading: {uploadProgress}%</span>
+                        {uploadSpeed && <span>{uploadSpeed} KB/s</span>}
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Error Message */}
                   {error && (
                     <motion.div
@@ -329,7 +381,7 @@ const JioMartCropper = () => {
                           {file.name}
                         </p>
                         <a
-                         href={`${import.meta.env.VITE_API_URL}${file.url}`}
+                          href={`${import.meta.env.VITE_API_URL}${file.url}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
@@ -353,9 +405,9 @@ const JioMartCropper = () => {
             </div>
 
             {/* Right - Settings Panel */}
-            <div className="md:w-1/3 p-8 bg-blue-400 text-white rounded-r-2xl shadow-inner">
+            <div className="md:w-1/3 p-8 bg-blue-500 text-white rounded-r-2xl shadow-inner">
               <h2 className="text-xl font-bold mb-4">Processing Settings</h2>
-              <p className="text-sm text-blue-200 mb-6">
+              <p className="text-sm text-blue-100 mb-6">
                 Configure how your JioMart labels will be cropped and sorted.
               </p>
               <div className="space-y-5">
@@ -376,7 +428,7 @@ const JioMartCropper = () => {
                       type="checkbox"
                       checked={settings[key]}
                       readOnly
-                      className="h-5 w-5 text-blue-400 bg-blue-400 border-blue-500 rounded cursor-pointer"
+                      className="h-5 w-5 text-blue-600 bg-blue-300 border-blue-600 rounded cursor-pointer"
                     />
                   </div>
                 ))}
@@ -385,7 +437,7 @@ const JioMartCropper = () => {
                 <h3 className="text-base font-semibold text-blue-100">
                   Files Summary
                 </h3>
-                <p className="mt-2 text-sm text-blue-200">
+                <p className="mt-2 text-sm text-blue-100">
                   {files.length > 0
                     ? `You have ${files.length} file(s) ready to be processed.`
                     : "No files uploaded yet. Please select PDFs on the left."}
@@ -394,7 +446,8 @@ const JioMartCropper = () => {
             </div>
           </div>
         </div>
-                {/* Platform Showcase */}
+        
+        {/* Platform Showcase */}
         <div className="mt-14">
           <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Other Platforms</h2>
           <div className="flex flex-wrap justify-center gap-8">

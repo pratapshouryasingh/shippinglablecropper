@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import axios from "axios";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useUser, useClerk } from "@clerk/clerk-react";
 import { Helmet } from "react-helmet";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import Cookies from "js-cookie";
 
 // Initial settings for Meesho
 const initialSettings = {
@@ -16,15 +18,28 @@ const initialSettings = {
 };
 
 const MeshooCropper = () => {
-  const [files, setFiles] = useState([]);
-  const [settings, setSettings] = useState(initialSettings);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processedFiles, setProcessedFiles] = useState([]);
-  const [error, setError] = useState("");
   const fileInputRef = useRef(null);
   const { user, isLoaded } = useUser();
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
+
+  // Load settings from cookie if exists
+  const savedSettings = Cookies.get("meesho_settings");
+  const [settings, setSettings] = useState(
+    savedSettings ? JSON.parse(savedSettings) : initialSettings
+  );
+
+  const [files, setFiles] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedFiles, setProcessedFiles] = useState([]);
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(null);
+
+  // Persist settings to cookie whenever it changes
+  useEffect(() => {
+    Cookies.set("meesho_settings", JSON.stringify(settings), { expires: 7 });
+  }, [settings]);
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files).filter(
@@ -65,6 +80,8 @@ const MeshooCropper = () => {
     setIsProcessing(true);
     setError("");
     setProcessedFiles([]);
+    setUploadProgress(0);
+    setUploadSpeed(null);
 
     try {
       const formData = new FormData();
@@ -72,56 +89,71 @@ const MeshooCropper = () => {
       formData.append("userId", user.id);
       formData.append("settings", JSON.stringify(settings));
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/meesho`, {
-        method: "POST",
-        body: formData,
-      });
+      const startTime = Date.now();
 
-      if (!res.ok) throw new Error("Server error");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/meesho`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percent);
 
-      const data = await res.json();
-      setProcessedFiles(data.outputs || []);
+            const elapsed = (Date.now() - startTime) / 1000; 
+            const speed = (progressEvent.loaded / 1024 / elapsed).toFixed(2);
+            setUploadSpeed(speed);
+          },
+        }
+      );
+
+      setProcessedFiles(res.data.outputs || []);
     } catch (err) {
       console.error(err);
       setError("Failed to process PDFs. Try again.");
     } finally {
       setIsProcessing(false);
+      setUploadProgress(0);
+      setUploadSpeed(null);
     }
   };
 
   const handleReset = () => {
     setFiles([]);
     setProcessedFiles([]);
-    setSettings(initialSettings);
     setError("");
+    setUploadProgress(0);
+    setUploadSpeed(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Helmet>
-  <title>Meesho Label Cropper | Free PDF Invoice & Label Tool</title>
-  <meta 
-    name="description" 
-    content="Easily crop and process Meesho PDF shipping labels and invoices with our free online cropper. Save time and optimize your e-commerce workflow." 
-  />
-  <meta 
-    name="keywords" 
-    content="Meesho label cropper, Meesho invoice tool, crop Meesho PDF, Meesho seller tools, e-commerce PDF crop, Meesho shipping label resize" 
-  />
-  <link rel="canonical" href="https://yourdomain.com/MeshooCropper" />
+        <title>Meesho Label Cropper | Free PDF Invoice & Label Tool</title>
+        <meta 
+          name="description" 
+          content="Easily crop and process Meesho PDF shipping labels and invoices with our free online cropper. Save time and optimize your e-commerce workflow." 
+        />
+        <meta 
+          name="keywords" 
+          content="Meesho label cropper, Meesho invoice tool, crop Meesho PDF, Meesho seller tools, e-commerce PDF crop, Meesho shipping label resize" 
+        />
+        <link rel="canonical" href="https://www.shippinglabelcrop.in/MeshooCropper" />
 
-  <meta property="og:title" content="Meesho Label Cropper | Free PDF Tool" />
-  <meta property="og:description" content="Free Meesho PDF label & invoice cropper. Process seller invoices quickly." />
-  <meta property="og:url" content="https://yourdomain.com/MeshooCropper" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://yourdomain.com/preview-meesho.png" />
+        <meta property="og:title" content="Meesho Label Cropper | Free PDF Tool" />
+        <meta property="og:description" content="Free Meesho PDF label & invoice cropper. Process seller invoices quickly." />
+        <meta property="og:url" content="https://www.shippinglabelcrop.in/MeshooCropper" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://www.shippinglabelcrop.in/preview-meesho.png" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Meesho Label Cropper | Free PDF Invoice Tool" />
-  <meta name="twitter:description" content="Crop & process Meesho PDF invoices and labels instantly." />
-  <meta name="twitter:image" content="https://yourdomain.com/preview-meesho.png" />
-</Helmet>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Meesho Label Cropper | Free PDF Invoice Tool" />
+        <meta name="twitter:description" content="Crop & process Meesho PDF invoices and labels instantly." />
+        <meta name="twitter:image" content="https://www.shippinglabelcrop.in/preview-meesho.png" />
+      </Helmet>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -141,7 +173,7 @@ const MeshooCropper = () => {
                   Meesho Label Cropper
                 </h1>
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(0)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg
@@ -244,6 +276,26 @@ const MeshooCropper = () => {
                           </button>
                         </div>
                       ))}
+                    </motion.div>
+                  )}
+
+                  {/* Upload Progress */}
+                  {isProcessing && uploadProgress > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-2"
+                    >
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-pink-600 h-2.5 rounded-full transition-all duration-300" 
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Uploading: {uploadProgress}%</span>
+                        {uploadSpeed && <span>{uploadSpeed} KB/s</span>}
+                      </div>
                     </motion.div>
                   )}
 
@@ -354,9 +406,9 @@ const MeshooCropper = () => {
             </div>
 
             {/* Right - Settings Panel */}
-            <div className="md:w-1/3 p-8 bg-pink-400 text-white rounded-r-2xl shadow-inner">
+            <div className="md:w-1/3 p-8 bg-pink-500 text-white rounded-r-2xl shadow-inner">
               <h2 className="text-xl font-bold mb-4">Processing Settings</h2>
-              <p className="text-sm text-pink-200 mb-6">
+              <p className="text-sm text-pink-100 mb-6">
                 Configure how your Meesho labels will be cropped and sorted.
               </p>
               <div className="space-y-5">
@@ -377,7 +429,7 @@ const MeshooCropper = () => {
                       type="checkbox"
                       checked={settings[key]}
                       readOnly
-                      className="h-5 w-5 text-pink-400 bg-pink-400 border-pink-500 rounded cursor-pointer"
+                      className="h-5 w-5 text-pink-600 bg-pink-300 border-pink-600 rounded cursor-pointer"
                     />
                   </div>
                 ))}
@@ -386,7 +438,7 @@ const MeshooCropper = () => {
                 <h3 className="text-base font-semibold text-pink-100">
                   Files Summary
                 </h3>
-                <p className="mt-2 text-sm text-pink-200">
+                <p className="mt-2 text-sm text-pink-100">
                   {files.length > 0
                     ? `You have ${files.length} file(s) ready to be processed.`
                     : "No files uploaded yet. Please select PDFs on the left."}
@@ -395,7 +447,8 @@ const MeshooCropper = () => {
             </div>
           </div>
         </div>
-                {/* Platform Showcase */}
+        
+        {/* Platform Showcase */}
         <div className="mt-14">
           <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Other Platforms</h2>
           <div className="flex flex-wrap justify-center gap-8">
@@ -411,10 +464,10 @@ const MeshooCropper = () => {
             
             <div 
               onClick={() => navigate("/MeshooCropper")}
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 border-2 border-blue-500 flex flex-col items-center"
+              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 border-2 border-pink-500 flex flex-col items-center"
             >
-              <div className="bg-orange-50 p-4 rounded-xl mb-4">
-                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">M</div>
+              <div className="bg-pink-50 p-4 rounded-xl mb-4">
+                <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center text-white font-bold">M</div>
               </div>
               <h3 className="text-lg font-semibold text-gray-800">Meesho</h3>
             </div>
