@@ -24,10 +24,6 @@ const FlipkartCropper = () => {
           add_date_on_top: true,
           keep_invoice: false,
           sku_order_count: true,
-          
-          // 👇 NEW defaults for invoice cropping
-          invoice_height: 900,  
-          padding: 6,           
         }
   );
 
@@ -56,10 +52,7 @@ const FlipkartCropper = () => {
   };
 
   const handleSettingToggle = (key) => {
-    // Only toggle boolean settings, not numeric ones
-    if (typeof settings[key] === 'boolean') {
-      setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-    }
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const removeFile = (index) => {
@@ -407,29 +400,27 @@ const FlipkartCropper = () => {
                 Configure how your Flipkart labels will be cropped and sorted.
               </p>
               <div className="space-y-5">
-                {Object.keys(settings)
-                  .filter((key) => !["invoice_height", "padding"].includes(key))
-                  .map((key) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between group cursor-pointer"
-                      onClick={() => handleSettingToggle(key)}
+                {Object.keys(settings).map((key) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between group cursor-pointer"
+                    onClick={() => handleSettingToggle(key)}
+                  >
+                    <label
+                      htmlFor={key}
+                      className="flex-1 text-m font-medium capitalize select-none text-white-1000 group-hover:text-white transition-colors cursor-pointer"
                     >
-                      <label
-                        htmlFor={key}
-                        className="flex-1 text-m font-medium capitalize select-none text-white-1000 group-hover:text-white transition-colors cursor-pointer"
-                      >
-                        {key.replace(/_/g, " ")}
-                      </label>
-                      <input
-                        id={key}
-                        type="checkbox"
-                        checked={settings[key]}
-                        readOnly
-                        className="h-5 w-5 text-white-800 bg-white-200 border-yellow-600 rounded cursor-pointer"
-                      />
-                    </div>
-                  ))}
+                      {key.replace(/_/g, " ")}
+                    </label>
+                    <input
+                      id={key}
+                      type="checkbox"
+                      checked={settings[key]}
+                      readOnly
+                      className="h-5 w-5 text-white-800 bg-white-200 border-yellow-600 rounded cursor-pointer"
+                    />
+                  </div>
+                ))}
               </div>
               <div className="mt-12 border-t border-yellow-600 pt-6">
                 <h3 className="text-base font-semibold text-white-100">
