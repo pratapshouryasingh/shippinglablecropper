@@ -35,11 +35,23 @@ const MeshooCropper = () => {
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSpeed, setUploadSpeed] = useState(null);
+  const [jobId, setJobId] = useState(null);
+  const [jobStatus, setJobStatus] = useState(null);
+  const [pollingInterval, setPollingInterval] = useState(null);
 
   // Persist settings to cookie whenever it changes
   useEffect(() => {
     Cookies.set("meesho_settings", JSON.stringify(settings), { expires: 7 });
   }, [settings]);
+
+  // Clean up polling interval on component unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files).filter(
@@ -59,6 +71,45 @@ const MeshooCropper = () => {
 
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Poll job status
+  const pollJobStatus = async (jobId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/status/${jobId}`
+      );
+      
+      const { status, outputs, error } = response.data;
+      setJobStatus(status);
+      
+      if (status === "done") {
+        // Job completed successfully
+        setProcessedFiles(outputs || []);
+        setIsProcessing(false);
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+      } else if (status === "error") {
+        // Job failed
+        setError(error || "Failed to process files");
+        setIsProcessing(false);
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+      }
+      // If status is "pending", we continue polling
+    } catch (err) {
+      console.error("Error polling job status:", err);
+      setError("Failed to check job status");
+      setIsProcessing(false);
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -82,6 +133,8 @@ const MeshooCropper = () => {
     setProcessedFiles([]);
     setUploadProgress(0);
     setUploadSpeed(null);
+    setJobId(null);
+    setJobStatus("pending");
 
     try {
       const formData = new FormData();
@@ -109,14 +162,20 @@ const MeshooCropper = () => {
         }
       );
 
-      setProcessedFiles(res.data.outputs || []);
+      // Set job ID and start polling
+      setJobId(res.data.jobId);
+      
+      // Start polling for job status every 5 seconds
+      const interval = setInterval(() => pollJobStatus(res.data.jobId), 5000);
+      setPollingInterval(interval);
+      
+      // Also poll immediately
+      pollJobStatus(res.data.jobId);
+
     } catch (err) {
       console.error(err);
-      setError("Failed to process PDFs. Try again.");
-    } finally {
+      setError("Failed to upload files. Try again.");
       setIsProcessing(false);
-      setUploadProgress(0);
-      setUploadSpeed(null);
     }
   };
 
@@ -126,6 +185,12 @@ const MeshooCropper = () => {
     setError("");
     setUploadProgress(0);
     setUploadSpeed(null);
+    setJobId(null);
+    setJobStatus(null);
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -193,7 +258,7 @@ const MeshooCropper = () => {
                 </button>
               </div>
 
-              {processedFiles.length === 0 ? (
+              {!isProcessing && processedFiles.length === 0 ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* File Upload Area */}
                   <div className="relative border-4 border-dashed border-pink-200 rounded-xl p-8 text-center bg-pink-50 hover:bg-pink-100 transition-colors">
@@ -353,6 +418,59 @@ const MeshooCropper = () => {
                     </button>
                   </div>
                 </form>
+              ) : isProcessing ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6 text-center py-12"
+                >
+                  <div className="flex justify-center">
+                    <svg
+                      className="animate-spin h-12 w-12 text-pink-600"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    Processing Your Files
+                  </h3>
+                  
+                  <p className="text-gray-600">
+                    {jobStatus === "pending" 
+                      ? "Your files are being processed. This may take a few minutes..." 
+                      : "Uploading files..."}
+                  </p>
+                  
+                  {jobId && (
+                    <p className="text-sm text-gray-500">
+                      Job ID: {jobId}
+                    </p>
+                  )}
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                    <div 
+                      className="bg-pink-600 h-2.5 rounded-full transition-all duration-300" 
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                </motion.div>
               ) : (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
