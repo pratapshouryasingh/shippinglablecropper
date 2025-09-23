@@ -106,7 +106,11 @@ export default function Navbar() {
               }`}
               onClick={() => setEcommerceDropdownOpen(!ecommerceDropdownOpen)}
             >
+<<<<<<< HEAD
               Cropper Tools
+=======
+              E-commerce Tools
+>>>>>>> 3f170de3830384163a8f00df41009b49aa9042a0
               <svg 
                 className={`w-4 h-4 transition-transform ${ecommerceDropdownOpen ? "rotate-180" : ""}`} 
                 fill="none" 
@@ -126,6 +130,7 @@ export default function Navbar() {
                   className="absolute bg-white shadow-xl rounded-lg py-2 w-48 mt-2 border border-gray-100 left-1/2 transform -translate-x-1/2 z-50"
                 >
                   <Link 
+<<<<<<< HEAD
                     to="/crop" 
                     className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
                       location.pathname === "/crop" 
@@ -137,6 +142,8 @@ export default function Navbar() {
                     Selection Cropper
                   </Link>
                   <Link 
+=======
+>>>>>>> 3f170de3830384163a8f00df41009b49aa9042a0
                     to="/FlipkartCropper" 
                     className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
                       location.pathname === "/FlipkartCropper" 
