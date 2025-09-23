@@ -36,7 +36,8 @@ export default function Navbar() {
   const isEcommercePage = [
     '/FlipkartCropper',
     '/JioMartCropper', 
-    '/MeshooCropper'
+    '/MeshooCropper',
+    '/crop'  // Added the new crop route
   ].includes(location.pathname);
 
   const navVariants = {
@@ -105,7 +106,7 @@ export default function Navbar() {
               }`}
               onClick={() => setEcommerceDropdownOpen(!ecommerceDropdownOpen)}
             >
-              E-commerce Tools
+              Cropper Tools
               <svg 
                 className={`w-4 h-4 transition-transform ${ecommerceDropdownOpen ? "rotate-180" : ""}`} 
                 fill="none" 
@@ -124,6 +125,17 @@ export default function Navbar() {
                   transition={{ duration: 0.2 }}
                   className="absolute bg-white shadow-xl rounded-lg py-2 w-48 mt-2 border border-gray-100 left-1/2 transform -translate-x-1/2 z-50"
                 >
+                  <Link 
+                    to="/crop" 
+                    className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
+                      location.pathname === "/crop" 
+                        ? "text-blue-600 bg-blue-50" 
+                        : "text-gray-700 hover:text-blue-600"
+                    }`}
+                    onClick={() => setEcommerceDropdownOpen(false)}
+                  >
+                    Selection Cropper
+                  </Link>
                   <Link 
                     to="/FlipkartCropper" 
                     className={`block px-4 py-2 hover:bg-blue-50 transition-colors ${
@@ -274,6 +286,17 @@ export default function Navbar() {
                   E-commerce Tools
                 </div>
                 <div className="pl-4 space-y-2">
+                  <Link 
+                    to="/crop" 
+                    className={`block py-2 ${
+                      location.pathname === "/crop" 
+                        ? "text-blue-600" 
+                        : "text-gray-600 hover:text-blue-600"
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Cropper
+                  </Link>
                   <Link 
                     to="/FlipkartCropper" 
                     className={`block py-2 ${

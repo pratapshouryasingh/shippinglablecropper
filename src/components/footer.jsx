@@ -112,7 +112,7 @@ const footer = () => {
           </p>
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 mt-4 md:mt-0">
             <div className="text-gray-400 text-sm">
-              Developed by <a href="https://pratap-portfolio-zdgh.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pratap</a>
+              Developed by <a href="https://pratap-portfolio-beta.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pratap</a>
             </div>
             <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
               Privacy Policy
