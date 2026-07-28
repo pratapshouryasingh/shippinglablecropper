@@ -113,7 +113,7 @@ const HistorySidebar = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-blue-600 text-white px-3 py-6 rounded-l-2xl shadow-lg hover:bg-blue-700 transition-all"
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-blue-600 text-white px-3 py-6 rounded-tr-2xl rounded-br-2xl shadow-lg hover:bg-blue-700 transition-all"
       >
         <History className="w-5 h-5" />
         <ChevronRight className="w-4 h-4 mt-2" />
